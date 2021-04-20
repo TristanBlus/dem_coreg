@@ -376,14 +376,14 @@ def compute_offset_nuth(dh, slope, aspect, min_count=100, remove_outliers=True, 
 
 #Attempt to fit polynomial functions to along-track and cross-track signals
 #See demtools for existing code
-def fit_at_ct():
-    #Derive from image corners in projected array
-    #Use known orbintal inclinations, project wgs geometry into srs
-    img1_inc
-    img2_inc
-    #Rotate
-    #Stats for rows, cols
-    #Fit
+# def fit_at_ct():
+#     #Derive from image corners in projected array
+#     #Use known orbintal inclinations, project wgs geometry into srs
+#     img1_inc
+#     img2_inc
+#     #Rotate
+#     #Stats for rows, cols
+#     #Fit
 
 #Function copied from from openPIV pyprocess
 def find_first_peak(corr):
@@ -486,18 +486,58 @@ def find_subpixel_peak_position(corr, subpixel_method='gaussian'):
             
     return subp_peak_position[0], subp_peak_position[1]
 
-def fft_destripe_block(dh, mask=None, filt_sz=5, rmse_th=0.05, percentile_th=97.5, plot=True)
-    """Detriping using FFT method while destripes in different direction existed in single image
+def fft_destripe_block(dh, blocks=None, mask=None, filt_sz=5, rmse_th=0.05, percentile_th=97.5, plot=True):
+    """ Detriping using FFT method while destripes in different direction existed in single image
+        no better way to handle it than using multiple masks?
     """
+    if len(blocks) is None or len(blocks) == 1:
+        stripes, f = fft_destripe(dh, mask=mask, filt_sz=filt_sz, rmse_th=rmse_th, percentile_th=percentile_th, plot=plot)
+    else:
+        stripes = np.zeros(dh.shape)
+        # stripes = np.ma.array(stripes, mask=np.ma.getmaskarray(dh))        
+        for block in blocks:
+            dh_block = np.ma.array(dh, mask=block)
+            stripe, f = fft_destripe(dh_block, mask=mask, filt_sz=filt_sz, rmse_th=rmse_th, percentile_th=percentile_th)
+            stripes += stripe
+        
+        stripes = np.ma.array(stripes, mask=np.ma.getmaskarray(dh))
+        dh_new = dh - stripes
 
-def fft_destripe(dh, mask=None, filt_sz=5, rmse_th=0.05, percentile_th=97.5, plot=True):
-    """Detriping using FFT method, useful for stripes removing in SRTM-X/C images
+        if plot:
+            from imview.lib import pltlib
+            # create a figure to show results
+            f, axa = plt.subplots(1, 3, figsize=(10, 4))
+            clim = malib.calcperc(dh, (2, 98))
+            im = axa[0].imshow(dh, cmap='cpt_rainbow_r', clim=clim)
+            pltlib.add_cbar(axa[0], im, arr=dh, clim=clim, label=None)
+            axa[0].set_title("A: Original $dh$\n(med = %0.2f, RMSE = %0.2f)"%(malib.fast_median(dh), malib.rmse(dh)))
+            axa[0].set_facecolor('w')
+            pltlib.hide_ticks(axa[0])
+
+            im = axa[1].imshow(stripes, cmap='cpt_rainbow_r', clim=(-5,5))
+            pltlib.add_cbar(axa[1], im, arr=stripes, clim=clim, label=None)
+            axa[1].set_title("B: Stripes from FFT")
+            axa[1].set_facecolor('w')
+            pltlib.hide_ticks(axa[1])
+
+            im = axa[2].imshow(dh_new, cmap='cpt_rainbow_r', clim=clim)
+            pltlib.add_cbar(axa[2], im, arr=dh_new, clim=clim, label=None)
+            axa[2].set_title("C: Destriped $dh$\n(med = %0.2f, RMSE = %0.2f)"%(malib.fast_median(dh_new), malib.rmse(dh_new)))
+            axa[2].set_facecolor('w')
+            pltlib.hide_ticks(axa[2])
+            # plt.show()
+
+        # for stripe in stripes:
+    return stripes, f
+
+def fft_destripe(dh, mask=None, filt_sz=5, rmse_th=0.05, percentile_th=97.5, plot=False):
+    """ Detriping using FFT method, useful for stripes removing in SRTM-X/C images
     """
     dh_orig = dh
     stripes = np.zeros(dh.shape)
     stripes = np.ma.array(stripes, mask=np.ma.getmaskarray(dh_orig))
 
-    RMSEs = [20000, 15000]
+    RMSEs = [20000, malib.rmse(dh)]
 	    
     # iteration counter
     iteration = 1
@@ -509,7 +549,7 @@ def fft_destripe(dh, mask=None, filt_sz=5, rmse_th=0.05, percentile_th=97.5, plo
 
         # for first iteration we use the original SRTM
         if iteration != 1:
-             dh = dh_new.copy()
+            dh = dh_new.copy()
 
         # immediately break if original RMSE is above 10, destriping won't work
         if malib.rmse(dh) > 10:
@@ -517,13 +557,13 @@ def fft_destripe(dh, mask=None, filt_sz=5, rmse_th=0.05, percentile_th=97.5, plo
             sys.exit()
 
         # append original RMSE for first iteration
-        if iteration==1:
-            RMSEs.append(malib.rmse(dh))
-        else:
-            pass
+        # if iteration==1:
+        #     RMSEs.append(malib.rmse(dh))
+        # else:
+        #     pass
 
         # now 2D fourier transform to convert to spectral density field
-        dh_foo = np.copy(dh)
+        dh_foo = dh.filled(0)
 
         # destriping using non-glac area
         if mask is not None:
@@ -563,7 +603,16 @@ def fft_destripe(dh, mask=None, filt_sz=5, rmse_th=0.05, percentile_th=97.5, plo
             print("maxmimum iterations (10) reached, breaking script, something's fishy with the tile")
             break
 
-    if plot == True:
+        # break if destriping not worked
+        if RMSEs[iteration]-RMSEs[iteration-1] > 0:
+            print("RMSE is getting higher FFT destriping not working for this data.")
+            dh_new = dh
+            stripes_tmp = np.zeros(dh.shape)
+            # return the stripes to last iteration
+            stripes -= stripes_tmp
+            break
+
+    if plot:
         from imview.lib import pltlib
         # create a figure to show results
         f, axa = plt.subplots(1, 3, figsize=(10, 4))
@@ -585,8 +634,11 @@ def fft_destripe(dh, mask=None, filt_sz=5, rmse_th=0.05, percentile_th=97.5, plo
         axa[2].set_title("C: Destriped $dh$\n(med = %0.2f, RMSE = %0.2f)"%(malib.fast_median(dh_new), malib.rmse(dh_new)))
         axa[2].set_facecolor('w')
         pltlib.hide_ticks(axa[2])
+        # plt.show()
 
         # f.savefig((out_dir + shortname + "_destriping"+str(int(iteration))+".png"), bbox_inches="tight", dpi=450)
+    else:
+        f = None  
     return stripes, f
 
 # # save out final destriped srtm
