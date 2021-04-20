@@ -486,8 +486,12 @@ def find_subpixel_peak_position(corr, subpixel_method='gaussian'):
             
     return subp_peak_position[0], subp_peak_position[1]
 
+def fft_destripe_block(dh, mask=None, filt_sz=5, rmse_th=0.05, percentile_th=97.5, plot=True)
+    """Detriping using FFT method while destripes in different direction existed in single image
+    """
+
 def fft_destripe(dh, mask=None, filt_sz=5, rmse_th=0.05, percentile_th=97.5, plot=True):
-    """Compute horizontal offset between input rasters using normalized cross-correlation (NCC) method
+    """Detriping using FFT method, useful for stripes removing in SRTM-X/C images
     """
     dh_orig = dh
     stripes = np.zeros(dh.shape)
