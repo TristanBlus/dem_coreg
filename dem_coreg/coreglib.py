@@ -533,6 +533,9 @@ def fft_destripe_block(dh, blocks=None, mask=None, filt_sz=5, rmse_th=0.05, perc
 def fft_destripe(dh, mask=None, filt_sz=5, rmse_th=0.05, percentile_th=97.5, plot=False):
     """ Detriping using FFT method, useful for stripes removing in SRTM-X/C images
     """
+    # TO DO:
+    # clean up codes
+    
     dh_orig = dh
     stripes = np.zeros(dh.shape)
     stripes = np.ma.array(stripes, mask=np.ma.getmaskarray(dh_orig))
@@ -553,14 +556,13 @@ def fft_destripe(dh, mask=None, filt_sz=5, rmse_th=0.05, percentile_th=97.5, plo
 
         # immediately break if original RMSE is above 10, destriping won't work
         if malib.rmse(dh) > 10:
-            print("not running destriping, RMSE too high\nthis tile may be of limited use\nno destriped SRTM-C output")
-            sys.exit()
+            print("not running destriping, RMSE too high\nno destripping performed")
+            dh_new = dh
+            break
 
         # append original RMSE for first iteration
         # if iteration==1:
         #     RMSEs.append(malib.rmse(dh))
-        # else:
-        #     pass
 
         # now 2D fourier transform to convert to spectral density field
         dh_foo = dh.filled(0)
@@ -605,7 +607,7 @@ def fft_destripe(dh, mask=None, filt_sz=5, rmse_th=0.05, percentile_th=97.5, plo
 
         # break if destriping not worked
         if RMSEs[iteration]-RMSEs[iteration-1] > 0:
-            print("RMSE is getting higher FFT destriping not working for this data.")
+            print("RMSE is getting higher, FFT destriping not working for this data.")
             dh_new = dh
             stripes_tmp = np.zeros(dh.shape)
             # return the stripes to last iteration
@@ -640,8 +642,3 @@ def fft_destripe(dh, mask=None, filt_sz=5, rmse_th=0.05, percentile_th=97.5, plo
     else:
         f = None  
     return stripes, f
-
-# # save out final destriped srtm
-# print("RMSE converged, destriping done, outputting new destriped SRTM")
-# array2rast(s_new, srtm, save_out)
-# print("destriping complete, destriped SRTM-C: %s"%save_out)
