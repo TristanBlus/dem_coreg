@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 
 from pygeotools.lib import iolib, malib, geolib, warplib, filtlib
 
-from demcoreg import coreglib, dem_mask
+from dem_coreg import coreglib, dem_mask
 
 from imview.lib import pltlib
 
