@@ -500,8 +500,7 @@ def fft_destripe(dh, blocks=None, mask=None, filt_sz=5, std_th=0.05, percentile_
         no better way to handle it than using multiple masks?
     """
     if blocks is None or len(blocks) == 1:
-        stripes = destripe(dh, mask=mask, filt_sz=filt_sz, std_th=std_th, percentile_th=percentile_th,
-                                  plot=plot)
+        stripes = destripe(dh, mask=mask, filt_sz=filt_sz, std_th=std_th, percentile_th=percentile_th)
     else:
         stripes = np.zeros(dh.shape)
         # stripes = np.ma.array(stripes, mask=np.ma.getmaskarray(dh))        
@@ -510,41 +509,36 @@ def fft_destripe(dh, blocks=None, mask=None, filt_sz=5, std_th=0.05, percentile_
             stripe = destripe(dh_block, mask=mask, filt_sz=filt_sz, std_th=std_th, percentile_th=percentile_th)
             stripes += stripe
 
-        stripes = np.ma.array(stripes, mask=np.ma.getmaskarray(dh))
-        dh_destripe = dh - stripes
-
-        dh_mask = np.ma.array(dh, mask=mask)
-        dh_destripe_mask = np.ma.array(dh_destripe, mask=mask)
-
-        dh_stats = malib.get_stats_dict(dh_mask, full=True)
-        dh_destripe_stats = malib.get_stats_dict(dh_destripe_mask, full=True)
-
-        if plot:
-            from imview.lib import pltlib
-            # create a figure to show results
-            f, axa = plt.subplots(1, 3, figsize=(10, 4))
-            clim = malib.calcperc(dh, (2, 98))
-            im = axa[0].imshow(dh, cmap='cpt_rainbow_r', clim=clim)
-            pltlib.add_cbar(axa[0], im, arr=dh, clim=clim, label=None)
-            axa[0].set_title("A: Original $dh$\n(med = %0.2f, STD = %0.2f)" % (dh_stats['med'], dh_stats['std']))
-            axa[0].set_facecolor('w')
-            pltlib.hide_ticks(axa[0])
-
-            im = axa[1].imshow(stripes, cmap='cpt_rainbow_r', clim=(-5, 5))
-            pltlib.add_cbar(axa[1], im, arr=stripes, clim=clim, label=None)
-            axa[1].set_title("B: Stripes from FFT")
-            axa[1].set_facecolor('w')
-            pltlib.hide_ticks(axa[1])
-
-            im = axa[2].imshow(dh_destripe, cmap='cpt_rainbow_r', clim=clim)
-            pltlib.add_cbar(axa[2], im, arr=dh_destripe, clim=clim, label=None)
-            axa[2].set_title(
-                "C: Destriped $dh$\n(med = %0.2f, STD = %0.2f)" % (dh_destripe_stats['med'], dh_destripe_stats['std']))
-            axa[2].set_facecolor('w')
-            pltlib.hide_ticks(axa[2])
-            # plt.show()
-
-        # for stripe in stripes:
+    stripes = np.ma.array(stripes, mask=np.ma.getmaskarray(dh))
+    dh_destripe = dh - stripes
+    dh_mask = np.ma.array(dh, mask=mask)
+    dh_destripe_mask = np.ma.array(dh_destripe, mask=mask)
+    dh_stats = malib.get_stats_dict(dh_mask, full=True)
+    dh_destripe_stats = malib.get_stats_dict(dh_destripe_mask, full=True)
+    
+    if plot:
+        from imview.lib import pltlib
+        # create a figure to show results
+        f, axa = plt.subplots(1, 3, figsize=(10, 4))
+        clim = malib.calcperc(dh, (2, 98))
+        im = axa[0].imshow(dh, cmap='cpt_rainbow_r', clim=clim)
+        pltlib.add_cbar(axa[0], im, arr=dh, clim=clim, label=None)
+        axa[0].set_title("A: Original $dh$\n(med = %0.2f, STD = %0.2f)" % (dh_stats['med'], dh_stats['std']))
+        axa[0].set_facecolor('w')
+        pltlib.hide_ticks(axa[0])
+        im = axa[1].imshow(stripes, cmap='cpt_rainbow_r', clim=(-5, 5))
+        pltlib.add_cbar(axa[1], im, arr=stripes, clim=clim, label=None)
+        axa[1].set_title("B: Stripes from FFT")
+        axa[1].set_facecolor('w')
+        pltlib.hide_ticks(axa[1])
+        im = axa[2].imshow(dh_destripe, cmap='cpt_rainbow_r', clim=clim)
+        pltlib.add_cbar(axa[2], im, arr=dh_destripe, clim=clim, label=None)
+        axa[2].set_title(
+            "C: Destriped $dh$\n(med = %0.2f, STD = %0.2f)" % (dh_destripe_stats['med'], dh_destripe_stats['std']))
+        axa[2].set_facecolor('w')
+        pltlib.hide_ticks(axa[2])
+        # plt.show()
+    # for stripe in stripes:
     return stripes, f
 
 
