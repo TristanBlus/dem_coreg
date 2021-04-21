@@ -380,7 +380,7 @@ def main(args=None):
                 # Prepare filtered version for tiltcorr fit
 
                 # 冰川区内大坡度区域
-                slope = get_filtered_slope(src_dem_clip_ds_align, slope_lim=(0.01, 35))
+                slope = get_filtered_slope(src_dem_clip_ds_align, slope_lim=(0.01, 40))
                 mask_glac_outlier = np.logical_and(mask_glac, np.ma.getmaskarray(slope))
 
                 diff_glac_outlier = np.ma.array(diff_align, mask=~mask_glac_outlier)
@@ -465,7 +465,7 @@ def main(args=None):
                 blocks = [1] * 2
                 blocks[0] = dem_mask.get_icemask(src_dem_ds_align, glac_shp_fn=shp_stripes_asc, erode=False)
                 blocks[1] = dem_mask.get_icemask(src_dem_ds_align, glac_shp_fn=shp_stripes_dsc, erode=False)
-                stripes, fig = coreglib.fft_destripe(diff_align_filt, blocks=blocks, mask=mask_glac, filt_sz=5, std_th=0.05, percentile_th=97.5, plot=True)
+                stripes, fig = coreglib.fft_destripe(dh, blocks=blocks, mask=mask_glac, filt_sz=5, std_th=0.05, percentile_th=97.5, plot=True)
 
                 if fig is not None:
                     dst_fn = outprefix + '_destripes.png'
@@ -568,8 +568,8 @@ def main(args=None):
         print("Writing out original difference map for common intersection before alignment")
         orig_diff_fn = outprefix + '_orig_diff.tif'
         iolib.writeGTiff(diff_orig, orig_diff_fn, ref_dem_clip_ds)
-        src_dem_clip_ds = None
-        # ref_dem_clip_ds = None
+        # src_dem_clip_ds = None
+        ref_dem_clip_ds = None
 
     if True:
         align_stats_fn = outprefix + '%s_align_stats.json' % xyz_shift_str_cum_fn
@@ -628,7 +628,7 @@ def main(args=None):
         axa[0, 0].set_title('Reference DEM')
         axa[0, 0].set_facecolor('w')
         pltlib.hide_ticks(axa[0, 0])
-        # pltlib.shp_overlay(axa[0,0], ref_dem_clip_ds, shp_fn, color='k')
+        # pltlib.shp_overlay(axa[0,0], src_dem_ds, shp_fn, color='k')
 
         axa[0, 1].imshow(src_dem_hs, cmap='gray')
         im = axa[0, 1].imshow(src_dem_orig, cmap='terrain', clim=dem_clim, alpha=0.6)
@@ -636,29 +636,29 @@ def main(args=None):
         axa[0, 1].set_title('Source DEM')
         axa[0, 1].set_facecolor('w')
         pltlib.hide_ticks(axa[0, 1])
-        # pltlib.shp_overlay(axa[0,1], ref_dem_clip_ds, shp_fn, color='k')
+        # pltlib.shp_overlay(axa[0,1], src_dem_ds, shp_fn, color='k')
         # axa[0,2].imshow(~static_mask_orig, clim=(0,1), cmap='gray')
         axa[0, 2].imshow(~mask_glac, clim=(0, 1), cmap='gray')
         axa[0, 2].set_title('Surfaces for co-registration')
         axa[0, 2].set_facecolor('w')
         pltlib.hide_ticks(axa[0, 2])
 
-        # dz_clim = malib.calcperc_sym(diff_align_filt[mask_glac], (1, 99))
-        # dz_clim_noglac = malib.calcperc_sym(diff_orig_compressed, (1, 99))
+        dz_clim = malib.calcperc_sym(diff_align_filt[mask_glac], (1, 99))
+        dz_clim_noglac = malib.calcperc_sym(diff_orig_compressed, (1, 99))
 
-        dz_clim = (-15, 15)
-        dz_clim_noglac = (-10, 10)
+        # dz_clim = (-10, 10)
+        # dz_clim_noglac = (-10, 10)
 
         # axa[0,3].imshow(~static_mask_gla, clim=(0,1), cmap='gray')
         # axa[0,3].set_title('static_mask_gla2')
         # # dz_clim = malib.calcperc_sym(diff_orig_compressed, (1, 99))
-        bins = np.linspace(dz_clim[0], dz_clim[1], 256)
+        bins = np.linspace(dz_clim_noglac[0], dz_clim_noglac[1], 256)
         # bins = np.linspace(-50, 50, 256)
         axa[0, 3].hist(diff_orig_compressed, bins, color='b', label='Before', alpha=0.5)
         # axa[1,3].hist(diff_align_compressed, bins, color='g', label='After', alpha=0.5)
         axa[0, 3].hist(diff_align_filt_compressed, bins, color='g', label='Filter', alpha=0.5)
         # axa[0, 3].set_xlim(*dz_clim_noglac)
-        axa[0, 3].set_xlim(-20, 20)
+        axa[0, 3].set_xlim(-50, 50)
         axa[0, 3].axvline(0, color='k', linewidth=0.5, linestyle=':')
         axa[0, 3].set_xlabel('Elev. Diff. (m)')
         axa[0, 3].set_ylabel('Count (px)')
@@ -676,7 +676,7 @@ def main(args=None):
         axa[1, 0].set_title('Elev. Diff. Before (m)')
         axa[1, 0].set_facecolor('w')
         pltlib.hide_ticks(axa[1, 0])
-        # pltlib.shp_overlay(axa[1,0], ref_dem_clip_ds, shp_fn, color='k')
+        # pltlib.shp_overlay(axa[1,0], src_dem_ds, shp_fn, color='k')
 
         axa[1, 1].imshow(ref_dem_hs, cmap='gray')
         im = axa[1, 1].imshow(diff_align, cmap='cpt_rainbow_r', clim=dz_clim, alpha=0.6)
@@ -684,7 +684,7 @@ def main(args=None):
         axa[1, 1].set_title('Elev. Diff. After (m)')
         axa[1, 1].set_facecolor('w')
         pltlib.hide_ticks(axa[1, 1])
-        # pltlib.shp_overlay(axa[1,1], ref_dem_clip_ds, shp_fn, color='k')
+        # pltlib.shp_overlay(axa[1,1], src_dem_ds, shp_fn, color='k')
 
         # tight_dz_clim = (-1.0, 1.0)
         # tight_dz_clim = (-10.0, 10.0)
@@ -698,7 +698,7 @@ def main(args=None):
         axa[1, 2].set_title('Elev. Diff. Remove. Outliers (m)')
         axa[1, 2].set_facecolor('w')
         pltlib.hide_ticks(axa[1, 2])
-        # pltlib.shp_overlay(axa[1,2], ref_dem_clip_ds, shp_fn, color='k')
+        # pltlib.shp_overlay(axa[1,2], src_dem_ds, shp_fn, color='k')
 
         tight_dz_clim = (-10, 10)
         axa[1, 3].imshow(ref_dem_hs, cmap='gray')
@@ -733,7 +733,7 @@ def main(args=None):
             ax.set_facecolor('w')
             pltlib.hide_ticks(ax)
             # pltlib.latlon_ticks(ax, lat_in=0.25, lon_in=0.25, in_crs=local_srs.ExportToProj4())
-            pltlib.shp_overlay(ax, ref_dem_clip_ds, shp_fn, color='k')
+            pltlib.shp_overlay(ax, src_dem_clip_ds, shp_fn, color='k')
 
             fig2_fn = outprefix + '_align_diff.png'
             fig2.savefig(fig2_fn, dpi=600, bbox_inches='tight', pad_inches=0.1)
