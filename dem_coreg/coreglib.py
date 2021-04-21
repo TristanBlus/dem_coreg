@@ -499,7 +499,7 @@ def fft_destripe(dh, blocks=None, mask=None, filt_sz=5, std_th=0.05, percentile_
     """ Detriping using FFT method while destripes in different direction existed in single image
         no better way to handle it than using multiple masks?
     """
-    if len(blocks) is None or len(blocks) == 1:
+    if blocks is None or len(blocks) == 1:
         stripes = destripe(dh, mask=mask, filt_sz=filt_sz, std_th=std_th, percentile_th=percentile_th,
                                   plot=plot)
     else:
