@@ -495,23 +495,29 @@ def find_subpixel_peak_position(corr, subpixel_method='gaussian'):
     return subp_peak_position[0], subp_peak_position[1]
 
 
-def fft_destripe_block(dh, blocks=None, mask=None, filt_sz=5, rmse_th=0.05, percentile_th=97.5, plot=True):
+def fft_destripe(dh, blocks=None, mask=None, filt_sz=5, std_th=0.05, percentile_th=97.5, plot=True):
     """ Detriping using FFT method while destripes in different direction existed in single image
         no better way to handle it than using multiple masks?
     """
     if len(blocks) is None or len(blocks) == 1:
-        stripes, f = fft_destripe(dh, mask=mask, filt_sz=filt_sz, rmse_th=rmse_th, percentile_th=percentile_th,
+        stripes = destripe(dh, mask=mask, filt_sz=filt_sz, std_th=std_th, percentile_th=percentile_th,
                                   plot=plot)
     else:
         stripes = np.zeros(dh.shape)
         # stripes = np.ma.array(stripes, mask=np.ma.getmaskarray(dh))        
         for block in blocks:
             dh_block = np.ma.array(dh, mask=block)
-            stripe, f = fft_destripe(dh_block, mask=mask, filt_sz=filt_sz, rmse_th=rmse_th, percentile_th=percentile_th)
+            stripe = destripe(dh_block, mask=mask, filt_sz=filt_sz, std_th=std_th, percentile_th=percentile_th)
             stripes += stripe
 
         stripes = np.ma.array(stripes, mask=np.ma.getmaskarray(dh))
-        dh_new = dh - stripes
+        dh_destripe = dh - stripes
+
+        dh_mask = np.ma.array(dh, mask=mask)
+        dh_destripe_mask = np.ma.array(dh_destripe, mask=mask)
+
+        dh_stats = malib.get_stats_dict(dh_mask, full=True)
+        dh_destripe_stats = malib.get_stats_dict(dh_destripe_mask, full=True)
 
         if plot:
             from imview.lib import pltlib
@@ -520,7 +526,7 @@ def fft_destripe_block(dh, blocks=None, mask=None, filt_sz=5, rmse_th=0.05, perc
             clim = malib.calcperc(dh, (2, 98))
             im = axa[0].imshow(dh, cmap='cpt_rainbow_r', clim=clim)
             pltlib.add_cbar(axa[0], im, arr=dh, clim=clim, label=None)
-            axa[0].set_title("A: Original $dh$\n(med = %0.2f, RMSE = %0.2f)" % (malib.fast_median(dh), malib.rmse(dh)))
+            axa[0].set_title("A: Original $dh$\n(med = %0.2f, STD = %0.2f)" % (dh_stats['med'], dh_stats['std']))
             axa[0].set_facecolor('w')
             pltlib.hide_ticks(axa[0])
 
@@ -530,10 +536,10 @@ def fft_destripe_block(dh, blocks=None, mask=None, filt_sz=5, rmse_th=0.05, perc
             axa[1].set_facecolor('w')
             pltlib.hide_ticks(axa[1])
 
-            im = axa[2].imshow(dh_new, cmap='cpt_rainbow_r', clim=clim)
-            pltlib.add_cbar(axa[2], im, arr=dh_new, clim=clim, label=None)
+            im = axa[2].imshow(dh_destripe, cmap='cpt_rainbow_r', clim=clim)
+            pltlib.add_cbar(axa[2], im, arr=dh_destripe, clim=clim, label=None)
             axa[2].set_title(
-                "C: Destriped $dh$\n(med = %0.2f, RMSE = %0.2f)" % (malib.fast_median(dh_new), malib.rmse(dh_new)))
+                "C: Destriped $dh$\n(med = %0.2f, STD = %0.2f)" % (dh_destripe_stats['med'], dh_destripe_stats['std']))
             axa[2].set_facecolor('w')
             pltlib.hide_ticks(axa[2])
             # plt.show()
@@ -542,23 +548,25 @@ def fft_destripe_block(dh, blocks=None, mask=None, filt_sz=5, rmse_th=0.05, perc
     return stripes, f
 
 
-def fft_destripe(dh, mask=None, filt_sz=5, rmse_th=0.05, percentile_th=97.5, plot=False):
+def destripe(dh, mask=None, filt_sz=5, std_th=0.05, percentile_th=97.5):
     """ Detriping using FFT method, useful for stripes removing in SRTM-X/C images
     """
     # TO DO:
     # clean up codes
 
-    dh_orig = dh
+    # dh_orig = dh
     stripes = np.zeros(dh.shape)
-    stripes = np.ma.array(stripes, mask=np.ma.getmaskarray(dh_orig))
+    stripes = np.ma.array(stripes, mask=np.ma.getmaskarray(dh))
 
-    RMSEs = [20000, malib.rmse(dh)]
+    std_orig = np.ma.array(dh, mask=mask).std(dtype='float64')
+
+    STDs = [20000, std_orig]
 
     # iteration counter
     iteration = 1
 
-    # stop when new RMSE is < X% improvement
-    while abs(RMSEs[iteration] - RMSEs[iteration - 1]) > RMSEs[iteration - 1] * rmse_th:
+    # stop when new STD is < X% improvement
+    while abs(STDs[iteration] - STDs[iteration - 1]) > STDs[iteration - 1] * std_th:
 
         print("FFT destriping iteration: %i" % iteration)
 
@@ -566,15 +574,15 @@ def fft_destripe(dh, mask=None, filt_sz=5, rmse_th=0.05, percentile_th=97.5, plo
         if iteration != 1:
             dh = dh_new.copy()
 
-        # immediately break if original RMSE is above 10, destriping won't work
-        if malib.rmse(dh) > 10:
-            print("not running destriping, RMSE too high\nno destripping performed")
+        # immediately break if original STD is above 10, destriping won't work
+        if np.ma.array(dh, mask=mask).std(dtype='float64') > 10:
+            print("not running destriping, STD too high\nno destripping performed")
             dh_new = dh
             break
 
-        # append original RMSE for first iteration
+        # append original STD for first iteration
         # if iteration==1:
-        #     RMSEs.append(malib.rmse(dh))
+        #     STDs.append(dh.std(dtype='float64'))
 
         # now 2D fourier transform to convert to spectral density field
         dh_foo = dh.filled(0)
@@ -608,8 +616,9 @@ def fft_destripe(dh, mask=None, filt_sz=5, rmse_th=0.05, percentile_th=97.5, plo
 
         stripes += stripes_tmp
 
-        # calculate the new RMSE
-        RMSEs.append(malib.rmse(dh_new))
+        # calculate the new STD
+        std_tmp = np.ma.array(dh_new, mask=mask).std(dtype='float64')
+        STDs.append(std_tmp)
 
         # increase counter and break if more than 10 iterations
         iteration += 1
@@ -618,41 +627,12 @@ def fft_destripe(dh, mask=None, filt_sz=5, rmse_th=0.05, percentile_th=97.5, plo
             break
 
         # break if destriping not worked
-        if RMSEs[iteration] - RMSEs[iteration - 1] > 0:
-            print("RMSE is getting higher, FFT destriping not working for this data.")
+        if STDs[iteration] - STDs[iteration - 1] > 0:
+            print("STD is getting higher, FFT destriping not working for this data.")
             dh_new = dh
             stripes_tmp = np.zeros(dh.shape)
             # return the stripes to last iteration
             stripes -= stripes_tmp
             break
 
-    if plot:
-        from imview.lib import pltlib
-        # create a figure to show results
-        f, axa = plt.subplots(1, 3, figsize=(10, 4))
-        clim = malib.calcperc(dh_orig, (2, 98))
-        im = axa[0].imshow(dh_orig, cmap='cpt_rainbow_r', clim=clim)
-        pltlib.add_cbar(axa[0], im, arr=dh_orig, clim=clim, label=None)
-        axa[0].set_title(
-            "A: Original $dh$\n(med = %0.2f, RMSE = %0.2f)" % (malib.fast_median(dh_orig), malib.rmse(dh_orig)))
-        axa[0].set_facecolor('w')
-        pltlib.hide_ticks(axa[0])
-
-        im = axa[1].imshow(stripes, cmap='cpt_rainbow_r', clim=(-5, 5))
-        pltlib.add_cbar(axa[1], im, arr=stripes, clim=clim, label=None)
-        axa[1].set_title("B: Stripes from FFT")
-        axa[1].set_facecolor('w')
-        pltlib.hide_ticks(axa[1])
-
-        im = axa[2].imshow(dh_new, cmap='cpt_rainbow_r', clim=clim)
-        pltlib.add_cbar(axa[2], im, arr=dh_new, clim=clim, label=None)
-        axa[2].set_title(
-            "C: Destriped $dh$\n(med = %0.2f, RMSE = %0.2f)" % (malib.fast_median(dh_new), malib.rmse(dh_new)))
-        axa[2].set_facecolor('w')
-        pltlib.hide_ticks(axa[2])
-        # plt.show()
-
-        # f.savefig((out_dir + shortname + "_destriping"+str(int(iteration))+".png"), bbox_inches="tight", dpi=450)
-    else:
-        f = None
-    return stripes, f
+    return stripes
