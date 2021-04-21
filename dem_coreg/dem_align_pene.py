@@ -38,14 +38,17 @@ def outlier_filter(diff, f=3, perc=None, max_dz=100):
 
     print("Absolute dz filter: %0.2f" % max_dz)
     # Absolute dz filter
-    diff = np.ma.masked_greater(diff, max_dz)
+    diff = np.ma.masked_greater(diff, abs(max_dz))
+    diff = np.ma.masked_less(diff, -abs(max_dz))
     print(diff.count())
 
     if perc is not None:
         diff = filtlib.perc_fltr(diff, perc)
-    else:
+    elif f is not None:
         # diff = filtlib.sigma_fltr(diff, f)
         diff = filtlib.mad_fltr(diff, f)
+    else:
+        print("Only absolute dz filter used.")
 
     print(diff.count())
     return diff
@@ -401,6 +404,10 @@ def main(args=None):
                 diff_align_filt_mask = np.ma.getmaskarray(diff_align_filt_nonglac)
 
                 diff_align_filt[mask_glac == True] = diff_align_glac_outlier[mask_glac == True]
+
+                # using max_dz to mask out outliers in glacirized region,
+                # cause for non-surge-type glacier, this value can be determined
+                diff_align_filt = outlier_filter(diff_align_filt, f=None, max_dz=max_dz)
 
             # Fit 2D polynomial to residuals and remove
             # To do: add support for along-track and cross-track artifacts
