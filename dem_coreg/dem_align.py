@@ -194,6 +194,8 @@ def getparser():
                         help='Define masks to use to limit reference surfaces for co-registration')
     parser.add_argument('-tiltcorr', action='store_true',
                         help='After preliminary translation, fit polynomial to residual elevation offsets and remove')
+    parser.add_argument('-destripe', action='store_true',
+                        help='After preliminary translation, remove stripes in the elevation offsets using FFT')
     parser.add_argument('-polyorder', type=int, default=1,
                         help='Specify order of polynomial fit')
     parser.add_argument('-tol', type=float, default=0.02,
@@ -230,6 +232,7 @@ def main(args=None):
     slope_lim = tuple(args.slope_lim)
     tiltcorr = args.tiltcorr
     polyorder = args.polyorder
+    destripe = args.destripe
     res = args.res
 
     # Maximum number of iterations
@@ -252,6 +255,9 @@ def main(args=None):
         # tiltcorr_tol = 0.1
         # if tol < tiltcorr_tol:
         #    tol = tiltcorr_tol
+    if destripe:
+        outdir += '_destripe'
+        destripe_done = False
 
     if not os.path.exists(outdir):
         os.makedirs(outdir)
@@ -354,8 +360,9 @@ def main(args=None):
 
             # Compute final elevation difference
             if True:
+                # the intersection extent could result in the different dimensions after src_dem aligned.
                 ref_dem_clip_ds_align, src_dem_clip_ds_align = warplib.memwarp_multi([ref_dem_ds, src_dem_ds_align],
-                                                                                     res=res, extent='intersection',
+                                                                                     res=res, extent='first',
                                                                                      t_srs=local_srs, r='cubic')
                 ref_dem_align = iolib.ds_getma(ref_dem_clip_ds_align, 1)
                 src_dem_align = iolib.ds_getma(src_dem_clip_ds_align, 1)
@@ -382,8 +389,8 @@ def main(args=None):
 
                 diff_glac_outlier = np.ma.array(diff_align, mask=~mask_glac_outlier)
                 if diff_glac_outlier.count() > 0:
-                    diff_align_glac_outlier = outlier_filter(np.ma.array(diff_align, mask=~mask_glac_outlier), f=2,
-                                                             max_dz=100)
+                    diff_align_glac_outlier = outlier_filter(np.ma.array(diff_align, mask=~mask_glac_outlier), f=3,
+                                                             max_dz=max_dz)
                     diff_align_glac_outlier[mask_glac_outlier == False] = diff_align[mask_glac_outlier == False]
                 else:
                     diff_align_glac_outlier = np.ma.array(diff_align, mask=None)
@@ -399,6 +406,9 @@ def main(args=None):
 
                 diff_align_filt[mask_glac == True] = diff_align_glac_outlier[mask_glac == True]
 
+                # using max_dz to mask out outliers in glacirized region,
+                # cause for non-surge-type glacier, this value can be determined
+                # diff_align_filt = outlier_filter(diff_align_filt, f=None, max_dz=max_dz)
             # Fit 2D polynomial to residuals and remove
             # To do: add support for along-track and cross-track artifacts
             if tiltcorr and not tiltcorr_done:
@@ -451,6 +461,28 @@ def main(args=None):
                 # For now, only do one tiltcorr
                 tiltcorr_done = True
                 # Now use original tolerance, and number of iterations
+                tol = args.tol
+                max_iter = n + args.max_iter
+
+            elif destripe and not destripe_done:
+
+                # shp_stripes_asc = '/media/tristan/Data2/HMA_dh/HMA_glac_shp/HMA_srtm_x_stripe_ascending.shp'
+                # shp_stripes_dsc = '/media/tristan/Data2/HMA_dh/HMA_glac_shp/HMA_srtm_x_stripe_descending.shp'
+
+                # blocks = [1] * 2
+                # blocks[0] = dem_mask.get_icemask(src_dem_clip_ds_align, glac_shp_fn=shp_stripes_asc, erode=False)
+                # blocks[1] = dem_mask.get_icemask(src_dem_clip_ds_align, glac_shp_fn=shp_stripes_dsc, erode=False)
+                stripes, fig = coreglib.fft_destripe(diff_align_filt, blocks=None, mask=mask_glac, filt_sz=5, std_th=0.05, percentile_th=97.5, plot=True)
+
+                if fig is not None:
+                    dst_fn = outprefix + '_destripes.png'
+                    print("Writing destriped plot: %s" % dst_fn)
+                    fig.savefig(dst_fn, dpi=450, bbox_inches='tight')
+
+                diff_align -= stripes
+                src_dem_ds_align = coreglib.apply_z_shift(src_dem_ds_align, -stripes, createcopy=False)
+
+                destripe_done = True
                 tol = args.tol
                 max_iter = n + args.max_iter
             else:

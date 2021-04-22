@@ -22,7 +22,6 @@ from imview.lib import pltlib
 
 
 # Turn off numpy multithreading
-
 # os.environ['OPENBLAS_NUM_THREADS'] = '1'
 
 def get_mask(ds, mask_list, dem_fn=None, writeout=False, erode=False):
@@ -361,8 +360,9 @@ def main(args=None):
 
             # Compute final elevation difference
             if True:
+            	# the intersection extent could result in the different dimensions after src_dem aligned.
                 ref_dem_clip_ds_align, src_dem_clip_ds_align = warplib.memwarp_multi([ref_dem_ds, src_dem_ds_align],
-                                                                                     res=res, extent='intersection',
+                                                                                     res=res, extent='first',
                                                                                      t_srs=local_srs, r='cubic')
                 ref_dem_align = iolib.ds_getma(ref_dem_clip_ds_align, 1)
                 src_dem_align = iolib.ds_getma(src_dem_clip_ds_align, 1)
@@ -471,8 +471,8 @@ def main(args=None):
                 shp_stripes_dsc = '/media/tristan/Data2/HMA_dh/HMA_glac_shp/HMA_srtm_x_stripe_descending.shp'
 
                 blocks = [1] * 2
-                blocks[0] = dem_mask.get_icemask(src_dem_ds_align, glac_shp_fn=shp_stripes_asc, erode=False)
-                blocks[1] = dem_mask.get_icemask(src_dem_ds_align, glac_shp_fn=shp_stripes_dsc, erode=False)
+                blocks[0] = dem_mask.get_icemask(src_dem_clip_ds_align, glac_shp_fn=shp_stripes_asc, erode=False)
+                blocks[1] = dem_mask.get_icemask(src_dem_clip_ds_align, glac_shp_fn=shp_stripes_dsc, erode=False)
                 stripes, fig = coreglib.fft_destripe(diff_align_filt, blocks=blocks, mask=mask_glac, filt_sz=5, std_th=0.05, percentile_th=97.5, plot=True)
 
                 if fig is not None:
