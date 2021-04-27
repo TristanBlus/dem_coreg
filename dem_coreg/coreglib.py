@@ -274,7 +274,6 @@ def compute_offset_nuth(dh, slope, aspect, min_count=100, remove_outliers=True, 
     # Started implementing this for more generic binning, needs testing
     # bin_count, x_bin_edges, y_bin_edges = malib.get_2dhist(xdata, ydata, \
     #        xlim=bin_range, nbins=(nbins, nbins), stat='count')
-
     """
     #Mask bins in grid directions, can potentially contain biased stats
     #Especially true for SGM algorithm
