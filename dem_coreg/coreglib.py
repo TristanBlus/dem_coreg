@@ -98,6 +98,7 @@ def compute_offset_sad(dem1, dem2, pad=(9, 9), plot=False):
             diff_madr = (diff_med - mad, diff_med + mad)
             diff = np.ma.masked_outside(diff, diff_madr)     
             """
+
             # Masked areas will decrease sum! Normalize by count of valid pixels
             m[i, j] = np.ma.abs(diff).sum() / diff.count()
 
