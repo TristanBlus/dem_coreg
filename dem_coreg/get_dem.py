@@ -84,38 +84,35 @@ def main():
         cmd = ['aria2c', '-c', '-s', '5', url, '-o', out_fn]
     else:
         cmd = ['aria2c', '-c', '-s', '5', '-j', '3', '-i', 'dem_url_list.txt', '--save-session=err_list']
-    for x in cmd:
-        print(x, end='')
     subprocess.call(cmd)
-    print('Download complete. Output dem:  %s\n' % out_fn)
 
 
-def get_extent(src_fn)
-"""
-get extent from source file, using the pygeotools package
-"""
+def get_extent(src_fn):
+    """get extent from source file, using the pygeotools package
+    """
+
     wgs_srs = geolib.wgs_srs
 
     suffix = os.path.splitext(src_fn)[-1]
-    if suffix == '.shp'
+    if suffix == '.shp':
         ds = ogr.Open(src_fn)
         lyr = ds.GetLayer()
         shp_srs = lyr.GetSpatialRef()
         if not shp_srs.IsSame(wgs_srs):
             lyr = geolib.lyr_proj(lyr, t_srs=wgs_srs).GetLayer()
         extent = geolib.lyr_extent(lyr)
-    elif suffix == '.tif'
+    elif suffix == '.tif':
         ds = gdal.Open(src_fn)
-        extent = geolib.ds_extent(src_ds, t_srs=wgs_srs)
+        extent = geolib.ds_extent(ds, t_srs=wgs_srs)
     else:
         sys.exit("Error input. Source file must be of ESRI shp or Geotiff format!")
     return extent
 
 
 def get_dem_url(extent=None, dem_type='SRTMGL1_E'):
-"""
-return opentopo api url to download dem
-"""
+    """ return opentopo api url to download dem
+    """
+
     minlon = int(extent[0] * 100) / 100
     minlat = int(extent[1] * 100) / 100
     maxlon = math.ceil(extent[2] * 100) / 100
