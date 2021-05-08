@@ -76,7 +76,7 @@ def main():
             out_file.write('\n')
         out_file.close()
 
-    if len(url)==1:
+    if isinstance(url, str) is True:
         outprefix = os.path.splitext(os.path.split(src_fn)[-1])[0]
         outprefix = os.path.join(outdir, outprefix)
         out_fn = outprefix + '_' + dem_type + '.tif'
