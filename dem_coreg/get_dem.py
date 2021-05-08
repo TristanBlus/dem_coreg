@@ -60,7 +60,7 @@ def main():
         f = open(src_fn_list)
         fn_list = [line.strip('\n') for line in f.readlines()]
         f.close()
-        urls = []
+        url = []
         for fn in fn_list:
             extent = get_extent(fn)
             url_tmp = get_dem_url(extent=extent, dem_type=dem_type)
@@ -68,11 +68,11 @@ def main():
             outprefix = os.path.splitext(os.path.split(fn)[-1])[0]
             outprefix = os.path.join(outdir, outprefix)
             out_fn = outprefix + '_' + dem_type + '.tif'
-            urls.append(url_tmp)
-            urls.append(' out='+out_fn)
+            url.append(url_tmp)
+            url.append(' out='+out_fn)
         out_file = open('dem_url_list.txt', 'w')
-        for url in urls:
-            out_file.write(str(url))
+        for line in url:
+            out_file.write(str(line))
             out_file.write('\n')
         out_file.close()
 
