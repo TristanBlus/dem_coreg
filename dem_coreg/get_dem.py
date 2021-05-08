@@ -112,11 +112,11 @@ def get_extent(src_fn):
 def get_dem_url(extent=None, dem_type='SRTMGL1_E'):
     """ return opentopo api url to download dem
     """
-
-    minlon = int(extent[0] * 100) / 100
-    minlat = int(extent[1] * 100) / 100
-    maxlon = math.ceil(extent[2] * 100) / 100
-    maxlat = math.ceil(extent[3] * 100) / 100
+    # enlarge the extent
+    minlon = int(extent[0] * 100) / 100 - 0.1
+    minlat = int(extent[1] * 100) / 100 - 0.1
+    maxlon = math.ceil(extent[2] * 100) / 100 + 0.1
+    maxlat = math.ceil(extent[3] * 100) / 100 + 0.1
 
     url_pre = 'https://portal.opentopography.org/API/globaldem?'
 
