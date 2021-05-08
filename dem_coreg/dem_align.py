@@ -384,7 +384,7 @@ def main(args=None):
                 # Prepare filtered version for tiltcorr fit
 
                 # 冰川区内大坡度区域
-                slope = get_filtered_slope(src_dem_clip_ds_align, slope_lim=(0.01, 35))
+                slope = get_filtered_slope(src_dem_clip_ds_align, slope_lim=(0.01, 40))
                 mask_glac_outlier = np.logical_and(mask_glac, np.ma.getmaskarray(slope))
 
                 diff_glac_outlier = np.ma.array(diff_align, mask=~mask_glac_outlier)
