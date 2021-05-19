@@ -46,7 +46,7 @@ def main():
     shp_fn = args.shp_fn
     if shp_fn is None:
     	datadir = iolib.get_datadir()
-    	shp_fn = os.path.join(datadir, 'gamdam/gamdam_merge_refine_line.shp')
+    	shp_fn = os.path.join(datadir, 'gamdam/gamdam_merge_refine.shp')
     shp_ds = ogr.Open(shp_fn)
     lyr = shp_ds.GetLayer()
     lyr_srs = lyr.GetSpatialRef()
