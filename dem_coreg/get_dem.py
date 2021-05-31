@@ -7,7 +7,6 @@ Central South University
 05/07/2021
 """
 # To do:
-# add KML support.
 
 import sys
 import os
@@ -36,7 +35,7 @@ def getparser():
 def main():
     parser = getparser()
     args = parser.parse_args()
-    
+
     src_fn = args.src_fn
     src_fn_list = args.src_fn_list
     extent = args.extent
@@ -94,18 +93,19 @@ def get_extent(src_fn):
     wgs_srs = geolib.wgs_srs
 
     suffix = os.path.splitext(src_fn)[-1]
-    if suffix == '.shp':
+    if suffix == '.shp' or suffix == '.kml':
         ds = ogr.Open(src_fn)
         lyr = ds.GetLayer()
         shp_srs = lyr.GetSpatialRef()
-        if not shp_srs.IsSame(wgs_srs):
+        # fix bugs in kml srs comparasion due to segfault
+        if suffix == '.shp' and not shp_srs.IsSame(wgs_srs):
             lyr = geolib.lyr_proj(lyr, t_srs=wgs_srs).GetLayer()
         extent = geolib.lyr_extent(lyr)
     elif suffix == '.tif':
         ds = gdal.Open(src_fn)
         extent = geolib.ds_extent(ds, t_srs=wgs_srs)
     else:
-        sys.exit("Error input. Source file must be of ESRI shp or Geotiff format!")
+        sys.exit("Error input. Source file must be of shp/kml or Geotiff format!")
     return extent
 
 

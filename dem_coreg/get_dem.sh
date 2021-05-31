@@ -41,7 +41,7 @@ get_extent() {
         minlat=$(echo "$limits_2" |awk -F '[" ",()]'+ '{print $4}')
         rm -rf src_info
     
-    elif [[ $ext == 'shp' ]]; then
+    elif [[ $ext == 'shp' || $ext == 'kml' ]]; then
 
         ogrinfo -al -so "$src_fn" > src_info
         minlon=$(awk -F '[,)( ]' '/Extent:/{print $3}' src_info)
