@@ -1,4 +1,7 @@
 #! /usr/bin/env python
+# python script for raster reprojection
+# can apply wgs to UTM, or other to WGS automatically
+# requirements: pygeotools, osgeo
 
 import sys
 import os

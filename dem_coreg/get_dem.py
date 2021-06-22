@@ -93,7 +93,7 @@ def get_extent(src_fn):
     wgs_srs = geolib.wgs_srs
 
     suffix = os.path.splitext(src_fn)[-1]
-    if suffix == '.shp' or suffix == '.kml':
+    if suffix in ('.shp', '.kml'):
         ds = ogr.Open(src_fn)
         lyr = ds.GetLayer()
         shp_srs = lyr.GetSpatialRef()

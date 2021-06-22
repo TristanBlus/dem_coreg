@@ -1,6 +1,7 @@
 #! /bin/bash
 #################   This script was part of the   #################
 ################# <dem_coreg> processing workflow #################
+########### shell script for opensource dem downloading ###########
 #################     Lei Guo,  CSU 28/05/2021    #################
 
 # proj='EPSG:4326'
@@ -19,7 +20,7 @@ usage() {
 	echo "                NASADEM              SRTMGL3"
 	echo "                AW3D30_E             AW3D30"
 	echo "                COP30                COP90"
-	echo "-s src_fn   (input) Source file to specify the extent(shp/raster)"
+	echo "-s src_fn   (input) Source file to specify the extent(shp/kml/raster)"
 	echo "-e extent   (input) Specified extent: 'minlon, minlat, maxlon, maxlat'"
 	echo "-o out_fn   (output) output name of downloaded DEM geotiff"
 	echo ""
@@ -74,6 +75,7 @@ get_dem_url() {
     url=${url_pre}'demtype='${dem_type}'&south='${minlat}'&north='${maxlat}'&west='${minlon}'&east='${maxlon}'&outputFormat=GTiff'
   
     api_dem='NASADEM COP30 COP90'
+    # for NASADEM/COPDEM downloading, apikey is needed pre-set, which can applied on Opentopography
     api_key='72dbcf229895ba05856406e6aed5c39f'
   
     if [[ $api_dem =~ $dem_type ]]; then
