@@ -1,4 +1,4 @@
-# Python/Bash Beginner's guide to demcoreg
+# Python/Bash Beginner's guide to dem_coreg
 
 The demcoreg README.md provides a basic overview of installation and usage for users with basic Python, bash, and git/github proficiency.  This document is intended to provide additional support for new users of these tools, who often need to co-register two DEMs for a relatively limited application, without all of the advanced options.  
 
@@ -9,10 +9,11 @@ The demcoreg README.md provides a basic overview of installation and usage for u
 ## Installation
 1. Install conda. Managing python packages is best done using conda. You can download miniconda for your OS/architecture here: https://docs.conda.io/en/latest/miniconda.html
 2. Open a terminal/shell
-3. Create and activate a Python environment called demcoreg_env with necessary packages installed:
-  - Run this command to create an environment: `conda create -c conda-forge -n demcoreg_env python=3.7 gdal=2.4 rasterio geopandas` 
+3. Create and activate a Python environment called demcoreg_env with necessary packages installed or directly install the requirements:
+  - Run this command to create an environment: `conda create -c conda-forge -n demcoreg_env python=3.8 gdal rasterio geopandas` 
   - After this completes, the new environment must be "activated". You can do this with: `conda activate demcoreg_env`
     - *Note: you will need to activate each time you start a new terminal session*
+  - Run this command to directly: `conda install -c conda-forge python gdal rasterio geopandas`
 4. Prepare to install software from github (this needs to be done only once)
   - Create a directory to store code from github repositories. One option is `~/src` which creates a new subdirectory `src` in your home directory, usually `/Users/loginname` (shorthand `~`). In the terminal, run: `mkdir ~/src`
   - Navigate to the new subdirectory: `cd ~/src`
