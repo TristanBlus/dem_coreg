@@ -26,7 +26,7 @@ The dem_coreg README.md provides a basic overview of installation and usage for 
   - `pip install -e demcoreg/`
   - `pip install -e imview/`
 7. Add the directory of installed packages to the enviroment path, should be `~/.bashrc` for Linux. Replace the root directionary '~/src' by your install path.
-  `export PATH="~/src/pygeotools/pygeotools:~/src/dem_coreg/dem_coreg:~/src/imview/imview:$PATH"`
+  - `export PATH="~/src/pygeotools/pygeotools:~/src/dem_coreg/dem_coreg:~/src/imview/imview:$PATH"`
   - Run `source ~/.bashrc` in your current terminal session
 8. You may need to reactivate the dem_coreg envionment if you ran `source ~/.bashrc`. As in step 3, do so with: `conda activate demcoreg_env`
 9. In your terminal, run `dem_align.py -h`.  You should see the usage statement starting with:
