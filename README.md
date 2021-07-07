@@ -1,7 +1,7 @@
-[![DOI](https://zenodo.org/badge/72886193.svg)](https://zenodo.org/badge/latestdoi/72886193)
 
-# demcoreg
-Python and shell scripts for co-registration of rasters, specifically horizontal and vertical alignment of digital elevation models (DEMs).
+# dem_coreg
+
+DEM raster co-registration toolkits. Based on David Shean's work([`demcoreg`](https://github.com/dshean/demcoreg) and [`pygeotools`](https://github.com/dshean/pygeotools)).
 
 ## Overview
 All DEMs have some horizontal and vertical geolocation error.  It is important to remove relative offsets when differencing DEMs for elevation change analyses.  These tools offer several options to solve this problem.  Most solve for the sub-pixel horizontal shift and vertical offset required to minimize errors over "static" control surfaces.  The ASP `pc_align` tool can also solve for more complex transformations with rotations and scaling. 
@@ -59,9 +59,9 @@ We are hoping to clean up the code, remove unnecessary dependencies, and streaml
 If unfamiliar with this process, or if you are new to Python, bash, and/or git/github, start with these more detailed instructions and notes: [Beginner's guide for installation and basic usage](./docs/beginners_doc.md)
 
 ### Building from Latest Source (recommended)
-1. Assuming you have working Python3 install with GDAL and NumPy, install [`pygeotools`](https://github.com/dshean/pygeotools)
-1. Clone the `demcoreg` repository: `git clone https://github.com/dshean/demcoreg.git`
-1. Perform developer install with pip: `pip install -e demcoreg`
+1. Assuming you have working Python3 install with GDAL and NumPy, install [`pygeotools`](https://github.com/tristanblus/pygeotools)
+1. Clone the `demcoreg` repository: `git clone https://github.com/tristanblus/dem_coreg.git`
+1. Perform developer install with pip: `pip install -e dem_coreg`
     - *The -e flag ("editable mode", setuptools "develop mode") will allow you to modify source code and immediately see changes. Useful if you need to make minor tweaks or bugfixes (please submit a Pull Request!)*
 1. Optionally, append the demcoreg subdirectory containing scripts to your PATH: `export PATH=${PATH}:$PWD/demcoreg/demcoreg` (replacing `$PWD` with the absolute path to the cloned demcoreg repository)
     - *To make this permanent, add that line to your shell config file (e.g., ~/.bashrc).* 
