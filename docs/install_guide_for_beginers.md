@@ -25,9 +25,8 @@ The dem_coreg README.md provides a basic overview of installation and usage for 
   - `pip install -e pygeotools/`
   - `pip install -e demcoreg/`
   - `pip install -e imview/`
-7. In addition to Python modules, these packages also contain some command-line scripts.  While you can always run these scripts from the terminal using a full path (e.g., `~/src/pygeotools/pygeotools/warptool.py`), it's convenient to run them using only `warptool.py`. To accomplish this, you can add the directory to the `~/.bashrc` (or `~/.bash_profile`) file in your home directory.
-  - To get the full path name `realpath demcoreg/demcoreg`
-  - Open `~/.bashrc` (or `~/.bash_profile`) in a text editor of your choice, and add this line to the end of the file: `export PATH="~/src/pygeotools/pygeotools:~/src/dem_coreg/dem_coreg:~/src/imview/imview:$PATH"`
+7. Add the directory of installed packages to the enviroment path, should be `~/.bashrc` for Linux. Replace the root directionary '~/src' by your install path.
+  `export PATH="~/src/pygeotools/pygeotools:~/src/dem_coreg/dem_coreg:~/src/imview/imview:$PATH"`
   - Run `source ~/.bashrc` in your current terminal session
 8. You may need to reactivate the dem_coreg envionment if you ran `source ~/.bashrc`. As in step 3, do so with: `conda activate demcoreg_env`
 9. In your terminal, run `dem_align.py -h`.  You should see the usage statement starting with:
