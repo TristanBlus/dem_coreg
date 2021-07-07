@@ -1,7 +1,7 @@
 
 # dem_coreg
 
-DEM raster co-registration toolkits. Based on David Shean's work([`demcoreg`](https://github.com/dshean/demcoreg)). This Packages should be work with the module [`pygeotools`](https://github.com/tristanblus/pygeotools).
+DEM raster co-registration toolkits. Based on David Shean's work([`demcoreg`](https://github.com/dshean/demcoreg)). This Packages should work with the modified version of [`pygeotools`](https://github.com/tristanblus/pygeotools).
 
 ## Overview
 All DEMs have some horizontal and vertical geolocation error.  It is important to remove relative offsets when differencing DEMs for elevation change analyses.  These tools offer several options to solve this problem.  Most solve for the sub-pixel horizontal shift and vertical offset required to minimize errors over "static" control surfaces.  The ASP `pc_align` tool can also solve for more complex transformations with rotations and scaling. 
