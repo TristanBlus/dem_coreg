@@ -1,9 +1,9 @@
 # Python/Bash Beginner's guide to dem_coreg
 
-The demcoreg README.md provides a basic overview of installation and usage for users with basic Python, bash, and git/github proficiency.  This document is intended to provide additional support for new users of these tools, who often need to co-register two DEMs for a relatively limited application, without all of the advanced options.  
+The dem_coreg README.md provides a basic overview of installation and usage for users with basic Python, bash, and git/github proficiency.  This document is intended to provide additional support for new users of these tools, who often need to co-register two DEMs for a relatively limited application, without all of the advanced options.  
 
 ## Operating System
-- The intructions below are for a \*nix machine (Linux or Mac OS X).
+- The intructions below are for a \*nix machine (Linux).
 - For Windows, we reccomend that you install [Ubuntu subsystem for Windows](https://docs.microsoft.com/en-us/windows/wsl/install-win10) and then follow the instructions below. Since you're using a linux subsystem, you want to use miniconda for linux in the first installation step (not Windows). 
 
 ## Installation
@@ -12,14 +12,14 @@ The demcoreg README.md provides a basic overview of installation and usage for u
 3. Create and activate a Python environment called demcoreg_env with necessary packages installed or directly install the requirements:
   - Run this command to create an environment: `conda create -c conda-forge -n demcoreg_env python=3.8 gdal rasterio geopandas` 
   - After this completes, the new environment must be "activated". You can do this with: `conda activate demcoreg_env`
-    - *Note: you will need to activate each time you start a new terminal session*
-  - Run this command to directly: `conda install -c conda-forge python gdal rasterio geopandas`
+    - *Note: you will need to activate each time you start a new terminal session*, or add "conda activate demcoreg_env" to your environmental files( ~/.bashrc)
+  - Run this command to directly install: `conda install -c conda-forge python gdal rasterio geopandas`
 4. Prepare to install software from github (this needs to be done only once)
   - Create a directory to store code from github repositories. One option is `~/src` which creates a new subdirectory `src` in your home directory, usually `/Users/loginname` (shorthand `~`). In the terminal, run: `mkdir ~/src`
   - Navigate to the new subdirectory: `cd ~/src`
 5. Clone github repositories:
-  - `git clone https://github.com/dshean/pygeotools.git`
-  - `git clone https://github.com/dshean/demcoreg.git`
+  - `git clone https://github.com/tristanblus/pygeotools.git`
+  - `git clone https://github.com/tristanblus/dem_coreg.git`
   - `git clone https://github.com/dshean/imview.git`
 6. Install these packages, so you can use them with your conda Python:
   - `pip install -e pygeotools/`
@@ -27,16 +27,9 @@ The demcoreg README.md provides a basic overview of installation and usage for u
   - `pip install -e imview/`
 7. In addition to Python modules, these packages also contain some command-line scripts.  While you can always run these scripts from the terminal using a full path (e.g., `~/src/pygeotools/pygeotools/warptool.py`), it's convenient to run them using only `warptool.py`. To accomplish this, you can add the directory to the `~/.bashrc` (or `~/.bash_profile`) file in your home directory.
   - To get the full path name `realpath demcoreg/demcoreg`
-  - Open `~/.bashrc` (or `~/.bash_profile`) in a text editor of your choice, and add this line to the end of the file: `export PATH="~/src/pygeotools/pygeotools:~/src/demcoreg/demcoreg:~/src/imview/imview:$PATH"`
-    - Navigate to your home directory using `cd ~`
-    - Type `ls -al` in the command line to view a list of files (including hidden files) in the home directory 
-    - Determine if you have `~/.bashrc` (or `~/.bash_profile`) 
-      - If neither exists, you can create with `touch ~/.bashrc`
-    - Edit the corresponding file with a text editor
-      - On OS X, can run `open ~/.bashrc` (or `open ~/.bash_profile`) to open the file with TextEdit.app
-      - On most platforms, can edit directly using `nano`, `vim`, `emacs` or other text editor
-  - Run `source ~/.bashrc` in your current terminal session (won't need to do this in the future)
-8. You may need to reactivate the demcoreg envionment if you ran `source ~/.bashrc`. As in step 3, do so with: `conda activate demcoreg_env`
+  - Open `~/.bashrc` (or `~/.bash_profile`) in a text editor of your choice, and add this line to the end of the file: `export PATH="~/src/pygeotools/pygeotools:~/src/dem_coreg/dem_coreg:~/src/imview/imview:$PATH"`
+  - Run `source ~/.bashrc` in your current terminal session
+8. You may need to reactivate the dem_coreg envionment if you ran `source ~/.bashrc`. As in step 3, do so with: `conda activate demcoreg_env`
 9. In your terminal, run `dem_align.py -h`.  You should see the usage statement starting with:
 ```
 usage: dem_align.py [-h] [-mode {ncc,sad,nuth,none}]
@@ -48,6 +41,7 @@ usage: dem_align.py [-h] [-mode {ncc,sad,nuth,none}]
                     [-outdir OUTDIR]
                     ref_fn src_fn
 ```
+10. The dem_coreg/pygeotools/imview packages should be installed correctly after above operations in your system. Type the `dem_align.py -h` to check, if errors, check the requirements and fix it. The required modules may be incomplete due to the code changes, so you should be attention to that.
 
 ## Basic command-line usage
 - If the above sequence of commands are followed, you have all the command-line tools and python libraries in `demcoreg`, `pygeotools` and `imview` at your disposal (Look at their corresponding readmes for more details).
