@@ -1,7 +1,7 @@
 
 # dem_coreg
 
-DEM raster co-registration toolkits. Based on David Shean's work([`demcoreg`](https://github.com/dshean/demcoreg) and [`pygeotools`](https://github.com/dshean/pygeotools)).
+DEM raster co-registration toolkits. Based on David Shean's work([`demcoreg`](https://github.com/dshean/demcoreg)). This Packages should be work with the module [`pygeotools`](https://github.com/tristanblus/pygeotools).
 
 ## Overview
 All DEMs have some horizontal and vertical geolocation error.  It is important to remove relative offsets when differencing DEMs for elevation change analyses.  These tools offer several options to solve this problem.  Most solve for the sub-pixel horizontal shift and vertical offset required to minimize errors over "static" control surfaces.  The ASP `pc_align` tool can also solve for more complex transformations with rotations and scaling. 
@@ -22,14 +22,16 @@ All DEMs have some horizontal and vertical geolocation error.  It is important t
         - Thresholded MODSCAG fSCA from ~2-week period around DEM timestamp
         - Thresholded SNODAS model
         - Thresholded Top-of-atmosphere reflectance values from corresponding orthoimage (requires pregeneration)
+- Stripes removing using FFT-based method (`coreglib.destripe`). Thanks to [`TanDEM-SRTM-dh`](https://github.com/bpurinton/TanDEM-SRTM-dh) by B. Purinton
+- Multiple buges fixed based on the original version developed by D. Shean. Including the python/module updates, code cleaning, error fixing and some other minor fixes. Of course, some useful functions were added according to my own needs.
 
-### Some useful command-line utilities (run with `-h` option for complete usage)
+### Example command-line utilities (run with `-h` option for complete usage)
 - `dem_align.py` - robust raster DEM co-registration (e.g., Nuth and Kaab [2011]) for surfaces with variable slope and aspect (e.g., mountains)
 - `dem_mask.py` - pre-generate mask to identify "stable" surfaces to use during co-registration
-- `pc_align_wrapper.sh` - wrapper around NASA Ames Stereo Pipeline pc_align utility for iterative closest point co-registration 
 - `apply_dem_translation.py` - update raster geotransform and remove vertical offset
 - `compute_diff.py` - simple DEM difference calculation with intuitive resampling options
 - `robust_stats.py` - print out robust raster statistics (e.g,. for DEM difference map before/after co-registration)
+- `get_dem.py` - global opensource DEM raster download from user specified raster/KML/shp
 
 ## Sample output 
 ### dem_align.py 
