@@ -40,7 +40,7 @@ get_extent() {
         maxlat=$(echo "$limits_1" |awk -F '[" ",()]'+ '{print $4}')
         maxlon=$(echo "$limits_2" |awk -F '[" ",()]'+ '{print $3}')
         minlat=$(echo "$limits_2" |awk -F '[" ",()]'+ '{print $4}')
-        rm -rf src_info
+        # rm -rf src_info
     
     elif [[ $ext == 'shp' || $ext == 'kml' ]]; then
 
@@ -49,7 +49,7 @@ get_extent() {
         minlat=$(awk -F '[,)( ]' '/Extent:/{print $5}' src_info)
         maxlon=$(awk -F '[,)( ]' '/Extent:/{print $9}' src_info)
         maxlat=$(awk -F '[,)( ]' '/Extent:/{print $11}' src_info)
-        rm -rf src_info
+        # rm -rf src_info
 
     else
         echo -e "ERROR: unsupported source file(shp/geotiff): $src_fn \n"

@@ -9,6 +9,7 @@ import sys
 import os
 import argparse
 import subprocess
+import glob
 
 from osgeo import gdal, ogr
 import numpy as np
@@ -500,6 +501,10 @@ def main(args=None):
         print("Writing out filtered aligned difference map with median vertical offset removed")
         iolib.writeGTiff(diff_align_filt, align_diff_filt_fn, src_dem_clip_ds_align)
 
+    # # ct and at correction
+    # coreglib.ct_at_correction_wrapper(src_dem_fn,align_diff_fn,align_diff_filt_fn)
+
+
     # Extract final center coordinates for intersection
     center_coord_ll = geolib.get_center(src_dem_clip_ds_align, t_srs=geolib.wgs_srs)
     center_coord_xy = geolib.get_center(src_dem_clip_ds_align)
@@ -615,7 +620,7 @@ def main(args=None):
         shp_extent = geolib.lyr_extent(lyr)
         ds_extent = geolib.ds_extent(src_dem_ds, t_srs=lyr_srs)
         if geolib.extent_compare(shp_extent, ds_extent) is False:
-            ext = '_n' + str(int(center_coord_ll[0])) + '_n' + str(int(center_coord_ll[1])).zfill(3)
+            ext = '_n' + str(int(center_coord_ll[1])).zfill(2) + '_e' + str(int(center_coord_ll[0])).zfill(3)
             # ext = os.path.splitext(os.path.split(ref_dem_fn)[-1])[0][4:13]
             out_fn = os.path.splitext(shp_fn)[0] + ext + '_clip.shp'
             geolib.clip_shp(shp_fn, extent=ds_extent, out_fn=out_fn)
@@ -744,6 +749,10 @@ def main(args=None):
 
             fig2_fn = outprefix + '_align_diff.png'
             fig2.savefig(fig2_fn, dpi=600, bbox_inches='tight', pad_inches=0.1)
+
+        shp_fn = os.path.splitext(shp_fn)[0] + '*'
+        for file in glob.glob(shp_fn):
+            os.remove(file)
 
 
 if __name__ == "__main__":

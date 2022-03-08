@@ -84,7 +84,7 @@ def get_glacier_poly():
     """
     #rgi_fn = os.path.join(datadir, 'rgi50/regions/rgi50_merge.shp')
     #Update to rgi60, should have this returned from get_rgi.sh
-    rgi_fn = os.path.join(datadir, 'gamdam/gamdam_merge_refine.shp')
+    rgi_fn = os.path.join(datadir, 'randoph/rgi60_asia_merge.shp')
     if not os.path.exists(rgi_fn):
         # cmd = ['get_rgi.sh',]
         sys.exit("Missing rgi glacier data source. If already downloaded, specify correct datadir. If not, run `%s` to download" % cmd[0])
